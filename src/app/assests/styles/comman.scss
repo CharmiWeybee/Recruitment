@@ -1,0 +1,83 @@
+.password-icon {
+  background-position: right 30px center !important;
+}
+
+.multiSelectContainer li:hover {
+  background-color: var(--kt-primary-light);
+  color: black;
+}
+
+.toast-message {
+  .Toastify__toast-body {
+    .Toastify__toast-icon {
+      // color: #50cd89 !important;
+    }
+  }
+
+  .Toastify__progress-bar--error {
+    // background: #50cd89 !important;
+  }
+}
+
+.search-bar {
+  width: 250px;
+
+  @media screen and #{$break-xs} {
+    width: 180px;
+  }
+}
+
+.app-header {
+  @media screen and #{$break-md-close} {
+    background-color: white !important;
+  }
+}
+
+.hr-line-parent {
+  display: flex;
+  align-items: center;
+  height: 3rem;
+}
+
+.stepper-hr {
+  width: 100px;
+  margin: 1rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.logo-name {
+  font-size: 24px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  color: #009ef7;
+}
+
+//pagination start
+.table-list-pagination-btn {
+  padding: 0.3rem 0.8rem;
+  margin: 0.2rem;
+  border-radius: 0.3rem;
+  border: none;
+  background: none;
+}
+
+.table-list-pagination-btn:hover {
+  z-index: 2;
+  color: #009ef7;
+  background-color: #f4f6fa;
+  border-color: transparent;
+  cursor: pointer;
+}
+
+.table-list-active {
+  background-color: var(--kt-primary) !important;
+  color: white !important;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+//pagination end

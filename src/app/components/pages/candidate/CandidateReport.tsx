@@ -1,246 +1,392 @@
-import React, { useEffect, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useWindowSize } from "../../../helpers/useWindowSize";
-import { KTCard, KTCardBody, KTSVG } from "../../../../_metronic/helpers";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/await-thenable */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useWindowSize } from '../../../helpers/useWindowSize';
+import { KTCard, KTSVG } from '../../../../_metronic/helpers';
+import { ADD_CANDIDATE } from '../../../helpers/routesConstant';
+import Loader from '../../common/loader/Loader';
+import { connect } from 'react-redux';
+import { fetchAllCandidates } from '../../../reducers/Candidates/candidateAction';
+import { Paginate } from '../../common/Paginate';
 import {
-  ADD_CANDIDATE,
-  ADD_INTERVIEW,
-  CANDIDATE_DETAIL,
-} from "../../../helpers/routesConstant";
-import Loader from "../../common/loader/Loader";
-import { connect } from "react-redux";
-import { fetchAllCandidates } from "../../../reducers/Candidates/candidateAction";
-import { Paginate } from "../../common/Paginate";
+	getSearchParameter,
+	searchparam,
+} from '../../../helpers/helperFunction';
+import { Form, Formik } from 'formik';
+import CandidateSearch from './CandidateSearch';
 import {
-  getSearchParameter,
-  searchparam,
-} from "../../../helpers/helperFunction";
+	fetchActiveDegrees,
+	fetchActiveModeofWork,
+	fetchActiveRecruitmentStatus,
+	fetchActiveSkill,
+} from '../../../reducers/mastersReducers/mastersAction';
+import CandidateReportTable from './CandidateReportTable';
+import CandidateFilters from './CandidateFilters';
+import { BackBtn } from '../../../helpers/BackBtn';
 
 interface Props {
-  getCandidates: any;
-  candidateListRes: any;
-  candidateListLoading: any;
-  candidateListErr: any;
+	getCandidates: any;
+	candidateListRes: any;
+	candidateListLoading: any;
+	candidateListErr: any;
+	getActiveDegree: any;
+	getActiveSkills: any;
+	getActiveRecruitmentStatus: any;
+	getActiveModeofWork: any;
+	degreeRes: any;
+	skillRes: any;
+	recruitmentStatusRes: any;
+	modeofWorkRes: any;
 }
 
 const CandidateReport = ({
-  getCandidates,
-  candidateListRes,
-  candidateListLoading,
+	getCandidates,
+	candidateListRes,
+	candidateListLoading,
+	getActiveDegree,
+	getActiveSkills,
+	getActiveRecruitmentStatus,
+	getActiveModeofWork,
+	degreeRes,
+	skillRes,
+	recruitmentStatusRes,
+	modeofWorkRes,
 }: Props) => {
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { isMobile, windowSize } = useWindowSize();
-  const [searchParam, setSearchParam] = useSearchParams();
-  const searchObj = useMemo(
-    () => getSearchParameter(searchParam),
-    [searchParam]
-  );
+	const navigate = useNavigate();
+	const [searchParams, setSearchParams] = useSearchParams();
+	const { isMobile, windowSize } = useWindowSize();
+	const [searchParam, setSearchParam] = useSearchParams();
+	const [searchValues, setSearchValues] = useState({
+		degree_id: '',
+		skill_id: '',
+		recruitment_status_id: '',
+		mode_of_work_id: '',
+	});
+	const [selectedSearchvalues, setSelectedSearchValues] = useState({
+		degree: '',
+		skill: '',
+		recruitment_status: '',
+		mode_of_work: '',
+	});
+	const searchObj = useMemo(
+		() => getSearchParameter(searchParam),
+		[searchParam]
+	);
 
-  useEffect(() => {
-    getCandidates(searchObj.page, { ...searchObj });
-  }, []);
+	useEffect(() => {
+		getCandidates(searchObj.page, { ...searchObj });
+		getActiveDegree();
+		getActiveSkills();
+		getActiveModeofWork();
+		getActiveRecruitmentStatus();
+	}, []);
 
-  const handlePagination = (page: any) => {
-    const updatedSearchObj = { ...searchObj, page: page };
-    setSearchParam(updatedSearchObj);
-    getCandidates(updatedSearchObj);
-  };
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const updatedSearchParams = new URLSearchParams(searchParams.toString());
-    updatedSearchParams.set("Search", event.target.value);
-    updatedSearchParams.set("page", "1");
+	const handleClear = (setFieldValue: any) => {
+		setFieldValue('degree_id', '');
+		setFieldValue('skill_id', '');
+		setFieldValue('recruitment_status_id', '');
+		setFieldValue('mode_of_work_id', '');
+		// const updatedSearchParams = new URLSearchParams(searchParams);
+		// updatedSearchParams.set('Search', ''); // Clear the 'Search' parameter
+		// setSearchParams(updatedSearchParams); // Update the searchParams state with the cleared value
+		// getCandidates(searchObj.page, { ...searchObj, ...updatedSearchParams });
+	};
 
-    const updatedSearchObj = getSearchParamsObject(
-      Object.fromEntries(updatedSearchParams.entries())
-    );
-    setSearchParam(updatedSearchObj);
-    getCandidates(updatedSearchObj);
-  };
+	useEffect(() => {
+		if (searchValues && Object.keys(searchValues).length > 0) {
+			const updatedSearchParams = new URLSearchParams(searchParams.toString());
+			updatedSearchParams.set('degree_id', searchValues.degree_id);
+			updatedSearchParams.set('skill_id', searchValues.skill_id);
+			updatedSearchParams.set(
+				'recruitment_status_id',
+				searchValues.recruitment_status_id
+			);
+			updatedSearchParams.set('mode_of_work_id', searchValues.mode_of_work_id);
 
-  const getSearchParamsObject = (
-    searchParams: Record<string, string | undefined>
-  ) => {
-    const searchObj: any = {};
-    Object.entries(searchParams).forEach(([key, value]) => {
-      searchObj[key] = value?.toString() || "";
-    });
-    return searchObj;
-  };
+			const updatedSearchObj = getSearchParamsObject(
+				Object.fromEntries(updatedSearchParams.entries())
+			);
+			setSearchParam(updatedSearchObj);
+		}
+	}, [searchValues]);
 
-  return (
-    <div>
-      <KTCard>
-        <div className="card-header border-0 pt-6 flex-nowrap">
-          <div className="card-title">
-            <div className="d-flex align-items-center position-relative my-1">
-              <KTSVG
-                path="/media/icons/duotune/general/gen021.svg"
-                className="svg-icon-1 position-absolute ms-6"
-              />
-              {/* <input
-                type="text"
-                data-kt-user-table-filter="search"
-                className="form-control form-control-solid search-bar ps-14"
-                value={searchParam.get("Search") || ""}
-                onChange={handleSearch}
-              /> */}
-              <input
-                type="text"
-                data-kt-user-table-filter="search"
-                className="form-control form-control-solid search-bar ps-14"
-                value={searchParams.get("Search") || ""}
-                onChange={handleSearch}
-              />
-            </div>
-          </div>
+	useEffect(() => {
+		if (searchParam) {
+			const updatedSearchObj = getSearchParamsObject(
+				Object.fromEntries(searchParam.entries())
+			);
+			getCandidates(updatedSearchObj);
+		}
+	}, [searchParam]);
 
-          <div className="card-toolbar">
-            <div
-              className="d-flex justify-content-end"
-              data-kt-user-table-toolbar="base"
-            ></div>
-            <button
-              type="button"
-              className={`btn btn-primary ${isMobile && "p-3"}`}
-              onClick={() => navigate(ADD_CANDIDATE)}
-            >
-              <KTSVG
-                path="/media/icons/duotune/arrows/arr075.svg"
-                className={`svg-icon-2 ${isMobile && "m-0"}`}
-              />
-              {isMobile ? null : "Add"}
-            </button>
-          </div>
-        </div>
-        <KTCardBody className="py-4">
-          {candidateListLoading && <Loader />}
-          {!candidateListLoading &&
-            candidateListRes &&
-            candidateListRes.length > 0 && (
-              <table className="table align-middle table-row-dashed fs-6 gy-5 dataTable no-footer">
-                <thead>
-                  <tr>
-                    <th className="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                      Id
-                    </th>
-                    <th className="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                      candidate name
-                    </th>
-                    <th className="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                      contact number
-                    </th>
-                    <th className="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                      recruitment status
-                    </th>
-                    <th className="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                      Total experiance
-                    </th>
-                    <th className="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                      Skills
-                    </th>
-                    <th className="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-                      action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="text-gray-600 fw-bold">
-                  {!candidateListLoading &&
-                    candidateListRes &&
-                    candidateListRes.map((list: any, index: any) => {
-                      return (
-                        <tr>
-                          <th scope="row">{list.id}</th>
-                          <td>{list.name}</td>
-                          <td>{list.contect_no}</td>
-                          <td>{list.recruitment_status}</td>
-                          {list.total_experience === "1" ? (
-                            <td>{list.total_experience} Year</td>
-                          ) : (
-                            <td>{list.total_experience} Years</td>
-                          )}
-                          <td>{list.skills}</td>
-                          <td>
-                            {" "}
-                            <span
-                              className="btn btn-sm btn-icon btn-light-primary me-4"
-                              title="View Details"
-                              onClick={() =>
-                                navigate(`${CANDIDATE_DETAIL}/${list.id}`)
-                              }
-                            >
-                              <i className="fa fa-eye"></i>
-                            </span>
-                            <span
-                              className="btn btn-sm btn-icon btn-light-primary me-4"
-                              title="Edit"
-                              onClick={() =>
-                                navigate(`${ADD_CANDIDATE}/${list.id}`)
-                              }
-                            >
-                              <KTSVG
-                                path="/media/icons/duotune/art/art005.svg"
-                                className="svg-icon-3"
-                              />
-                            </span>
-                            <span
-                              className="btn btn-sm btn-icon btn-light-primary me-4"
-                              title="Resume"
-                            >
-                              <a
-                                href={list.resume_id}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                <KTSVG
-                                  path="/media/icons/duotune/general/gen005.svg"
-                                  className="svg-icon-3"
-                                />
-                              </a>
-                            </span>
-                            <span
-                              className="btn btn-sm btn-icon btn-light-primary me-4"
-                              title="Schedule Interview"
-                              onClick={() =>
-                                navigate(`${ADD_INTERVIEW}/${list.id}`)
-                              }
-                            >
-                              <i className="fa fa-clock"></i>
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </table>
-            )}
-        </KTCardBody>
-      </KTCard>
-      <div className="d-flex justify-content-end">
-        <Paginate
-          itemsPerPage={5}
-          itemLength={Number(candidateListRes?.totalCount)}
-          currentPage={Number(searchObj.page || 1)}
-          handleClick={handlePagination}
-        />
-      </div>
-    </div>
-  );
+	const handlePagination = (page: any) => {
+		const updatedSearchObj = { ...searchObj, page };
+		setSearchParam(updatedSearchObj);
+		getCandidates(updatedSearchObj);
+	};
+	const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const updatedSearchParams = new URLSearchParams(searchParams.toString());
+		updatedSearchParams.set('Search', event.target.value);
+		updatedSearchParams.set('page', '1');
+
+		const updatedSearchObj = getSearchParamsObject(
+			Object.fromEntries(updatedSearchParams.entries())
+		);
+		setSearchParam({ ...updatedSearchObj, ...searchParam });
+	};
+
+	const getSearchParamsObject = (
+		searchParams: Record<string, string | undefined>
+	) => {
+		const searchObj: any = {};
+		Object.entries(searchParams).forEach(([key, value]) => {
+			searchObj[key] = value?.toString() || '';
+		});
+		return searchObj;
+	};
+
+	const initialValues = {
+		degree_id: '',
+		skill_id: '',
+		recruitment_status_id: '',
+		mode_of_work_id: '',
+	};
+
+	const addFilterTag = (filterName: any, value: any) => {
+		switch (filterName) {
+			case 'degree_id':
+				{
+					const selectedDegree = degreeRes?.find(
+						(degree: any) => Number(degree.id) === Number(value)
+					);
+					if (selectedDegree) {
+						setSelectedSearchValues((prevValues) => ({
+							...prevValues,
+							degree: selectedDegree.degree,
+						}));
+					}
+				}
+				break;
+			case 'skill_id':
+				{
+					const selectedSkill = skillRes?.find(
+						(skill: any) => Number(skill.id) === Number(value)
+					);
+					if (selectedSkill) {
+						setSelectedSearchValues((prevValues) => ({
+							...prevValues,
+							skill: selectedSkill.skill,
+						}));
+					}
+				}
+				break;
+			case 'recruitment_status_id':
+				{
+					const selectedRecruitmentStatus = recruitmentStatusRes?.find(
+						(recruitmentStatus: any) =>
+							Number(recruitmentStatus.id) === Number(value)
+					);
+					if (selectedRecruitmentStatus) {
+						setSelectedSearchValues((prevValues) => ({
+							...prevValues,
+							recruitment_status: selectedRecruitmentStatus.recruitment_status,
+						}));
+					}
+				}
+				break;
+			case 'mode_of_work_id':
+				{
+					const selectedModeofWork = modeofWorkRes?.find(
+						(modeofWork: any) => Number(modeofWork.id) === Number(value)
+					);
+					if (selectedModeofWork) {
+						setSelectedSearchValues((prevValues) => ({
+							...prevValues,
+							mode_of_work: selectedModeofWork.mode_of_work,
+						}));
+					}
+				}
+				break;
+			default:
+				break;
+		}
+	};
+
+	const handleSearchValues = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		const { name, value } = e.target;
+		setSearchValues((prevSearchValues) => ({
+			...prevSearchValues,
+			[name]: value,
+		}));
+		addFilterTag(name, value);
+	};
+
+	const handleRemoveFilter = (filterName: string, setFieldValue: any) => {
+		let currentSearchValues = searchValues;
+		switch (filterName) {
+			case 'degree':
+				setSelectedSearchValues((prevValues) => ({
+					...prevValues,
+					degree: '',
+				}));
+				currentSearchValues = { ...currentSearchValues, degree_id: '' };
+				setFieldValue('degree_id', '');
+				break;
+			case 'skill':
+				setSelectedSearchValues((prevValues) => ({
+					...prevValues,
+					skill: '',
+				}));
+				currentSearchValues = { ...currentSearchValues, skill_id: '' };
+				setFieldValue('skill_id', '');
+				break;
+			case 'recruitment_status':
+				setSelectedSearchValues((prevValues) => ({
+					...prevValues,
+					recruitment_status: '',
+				}));
+				currentSearchValues = {
+					...currentSearchValues,
+					recruitment_status_id: '',
+				};
+				setFieldValue('recruitment_status_id', '');
+
+				break;
+			case 'mode_of_work':
+				setSelectedSearchValues((prevValues) => ({
+					...prevValues,
+					mode_of_work: '',
+				}));
+				currentSearchValues = { ...currentSearchValues, mode_of_work_id: '' };
+				setFieldValue('mode_of_work_id', '');
+				break;
+			default:
+				break;
+		}
+		setSearchValues({ ...currentSearchValues });
+		getCandidates(currentSearchValues);
+	};
+
+	return (
+		<div>
+			<div className="d-flex flex-column">
+				<div className="mb-3 head1 d-flex">
+					<BackBtn />
+					Candidate Report
+				</div>
+				<div className="mb-3">
+					<Formik
+						enableReinitialize={true}
+						initialValues={initialValues}
+						onSubmit={(values: any) => {
+							// onSubmit(values);
+						}}
+					>
+						{({ values, setFieldValue }) => (
+							<Form className="form">
+								<CandidateSearch
+									setFieldValue={setFieldValue}
+									setSearchvalues={setSearchValues}
+									handleSearchValues={handleSearchValues}
+									handleClear={handleClear}
+								/>
+								<CandidateFilters
+									setFieldValue={setFieldValue}
+									values={values}
+									handleRemoveFilter={handleRemoveFilter}
+									selectedSearchvalues={selectedSearchvalues}
+								/>
+							</Form>
+						)}
+					</Formik>
+				</div>
+			</div>
+
+			<KTCard>
+				<div className="card-header border-0 pt-6 flex-nowrap">
+					<div className="card-title">
+						<div className="d-flex align-items-center position-relative my-1">
+							<KTSVG
+								path="/media/icons/duotune/general/gen021.svg"
+								className="svg-icon-1 position-absolute ms-6"
+							/>
+							<input
+								type="text"
+								data-kt-user-table-filter="search"
+								className="form-control form-control-solid search-bar ps-14"
+								value={searchParams.get('Search') || ''}
+								onChange={handleSearch}
+							/>
+						</div>
+					</div>
+
+					<div className="card-toolbar">
+						<div
+							className="d-flex justify-content-end"
+							data-kt-user-table-toolbar="base"
+						></div>
+						<button
+							type="button"
+							className={`btn btn-primary ${isMobile && 'p-3'}`}
+							onClick={() => navigate(ADD_CANDIDATE)}
+						>
+							<KTSVG
+								path="/media/icons/duotune/arrows/arr075.svg"
+								className={`svg-icon-2 ${isMobile && 'm-0'}`}
+							/>
+							{isMobile ? null : 'Add'}
+						</button>
+					</div>
+				</div>
+				<CandidateReportTable
+					candidateListLoading={candidateListLoading}
+					candidateListRes={candidateListRes}
+				/>
+			</KTCard>
+			<div className="d-flex justify-content-end">
+				<Paginate
+					itemsPerPage={5}
+					itemLength={Number(candidateListRes?.totalCount)}
+					currentPage={Number(searchObj.page || 1)}
+					handleClick={handlePagination}
+				/>
+			</div>
+		</div>
+	);
 };
 
 const mapStateToProps = (state: any) => {
-  return {
-    candidateListRes: state.getAllCandidateReducer.data,
-    candidateListLoading: state.getAllCandidateReducer.loading,
-    candidateListErr: state.getAllCandidateReducer.error,
-  };
+	return {
+		candidateListRes: state.getAllCandidateReducer.data,
+		candidateListLoading: state.getAllCandidateReducer.loading,
+		candidateListErr: state.getAllCandidateReducer.error,
+
+		degreeRes: state.getActiveDegreeReducer.data,
+		skillRes: state.getActiveSkillReducer.data,
+		modeofWorkRes: state.getActiveModeofWorkReducer.data,
+		recruitmentStatusRes: state.getActiveRecruitmentStatusReducer.data,
+	};
 };
 
 const mapDispatchToProps = (dispatch: any) => {
-  return {
-    getCandidates: (searchObj: searchparam) =>
-      dispatch(fetchAllCandidates(searchObj)),
-  };
+	return {
+		getCandidates: (searchObj: searchparam, queryParams?: any) =>
+			dispatch(fetchAllCandidates(searchObj, queryParams)),
+
+		getActiveDegree: () => dispatch(fetchActiveDegrees()),
+		getActiveSkills: () => dispatch(fetchActiveSkill()),
+		getActiveRecruitmentStatus: () => dispatch(fetchActiveRecruitmentStatus()),
+		getActiveModeofWork: () => dispatch(fetchActiveModeofWork()),
+	};
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(CandidateReport);

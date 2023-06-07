@@ -12,3 +12,24 @@
 // Layout
 @import "./core/layout/base/layout";
 @import "layout/layout";
+
+
+//candidate report list
+.filter-section {
+  gap: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.search-dropdowns {
+  overflow-x: auto;
+}
+
+.report-cards {
+  overflow-x: auto;
+}
+
+.report-table-header {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

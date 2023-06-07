@@ -12,12 +12,10 @@ import { fetchCandidateById } from '../../../reducers/Candidates/candidateAction
 import { connect } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import Loader from '../../common/loader/Loader';
-import {
-	fetchInterviewsByCandidateId,
-	fetchInterviewsById,
-} from '../../../reducers/Interviews/interviewAction';
+import { fetchInterviewsByCandidateId } from '../../../reducers/Interviews/interviewAction';
 import { KTCard, KTCardBody, KTSVG } from '../../../../_metronic/helpers';
 import { ADD_INTERVIEW } from '../../../helpers/routesConstant';
+import { BackBtn } from '../../../helpers/BackBtn';
 
 interface Props {
 	candidateRes: any;
@@ -58,16 +56,17 @@ const CandidateDetail = ({
 
 	return (
 		<>
-			<div className="p-4 d-flex justify-content-between">
-				<div className="d-flex align-items-end">
+			<div className=" d-flex justify-content-between">
+				<div className="d-flex align-items-center">
 					{' '}
+					<BackBtn />
 					<span className="fw-bold fs-3">Candidate Details</span>
 				</div>
 				{candidateRes &&
 					candidateRes.resume_id &&
 					candidateRes.resume_id !== 'undefined' && (
 						<a href={candidateRes.resume_id} target="_blank" rel="noreferrer">
-							<button className="btn btn-primary">Resume</button>
+							<button className="btn btn-primary mb-2">Resume</button>
 						</a>
 					)}
 			</div>

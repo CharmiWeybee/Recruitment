@@ -16,7 +16,6 @@ const InterviewFilters = ({
 	handleRemoveFilter,
 	setFieldValue,
 }: Props) => {
-	console.log(values.status_id);
 	return (
 		<div>
 			<div className="d-flex filter-section">

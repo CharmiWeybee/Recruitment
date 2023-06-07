@@ -334,17 +334,6 @@ const CandidateReport = ({
 							className="d-flex justify-content-end"
 							data-kt-user-table-toolbar="base"
 						></div>
-						<button
-							type="button"
-							className={`btn btn-primary ${isMobile && 'p-3'}`}
-							onClick={() => navigate(ADD_CANDIDATE)}
-						>
-							<KTSVG
-								path="/media/icons/duotune/arrows/arr075.svg"
-								className={`svg-icon-2 ${isMobile && 'm-0'}`}
-							/>
-							{isMobile ? null : 'Add'}
-						</button>
 					</div>
 				</div>
 				<CandidateReportTable

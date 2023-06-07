@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable import/no-extraneous-dependencies */
@@ -33,8 +34,9 @@ import {
 	updateInterview,
 } from '../../../reducers/Interviews/interviewAction';
 import Loader from '../../common/loader/Loader';
-import { KTCard, KTCardBody, KTSVG } from '../../../../_metronic/helpers';
+import { KTCard, KTCardBody } from '../../../../_metronic/helpers';
 import * as Yup from 'yup';
+import { BackBtn } from '../../../helpers/BackBtn';
 
 interface Props {
 	interviewTypeRes: any;
@@ -125,7 +127,8 @@ const AddInterview = ({
 	};
 	return (
 		<>
-			<div className="p-4">
+			<div className="py-4 d-flex">
+				<BackBtn />
 				<span className="fw-bold fs-3">Add Interview</span>
 			</div>
 			<div className="card collapse show p-9">
@@ -308,7 +311,7 @@ const AddInterview = ({
 					)}
 				/>
 			</div>
-			<div className="p-4">
+			<div className="py-4">
 				<span className="fw-bold fs-3">Scheduled Interviews</span>
 			</div>
 			<KTCard>
@@ -347,6 +350,9 @@ const AddInterview = ({
 										</th>
 										<th className="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
 											Remarks
+										</th>
+										<th className="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
+											actions
 										</th>
 									</tr>
 								</thead>

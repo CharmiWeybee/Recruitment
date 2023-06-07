@@ -55,11 +55,6 @@ const Step3 = ({
 	const [toDate, setToDate] = useState<Date>(new Date());
 
 	const params = useParams();
-	console.log(
-		values.previs_companies[0].from,
-		new Date(values.previs_companies[0].from),
-		'step3123'
-	);
 
 	useEffect(() => {
 		getActiveModeofWork();
